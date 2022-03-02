@@ -1,0 +1,98 @@
+---
+title: "Grupo DataFun"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# 0) Carga de data y librerias
+
+```{r}
+setwd("D:/UAI/2022 - 1/Big Data/Tarea 1")
+df <- read.csv("datosRetail.csv", header = TRUE, sep = ",")
+
+library(plyr)
+library(dplyr)
+library(stringi)
+```
+
+
+# 1) Análisis exploratorio
+
+## 1.1) Resumen de los datos
+```{r, echo=FALSE}
+summary(df)
+```
+
+
+## 1.2) Total Ventas
+```{r, echo=FALSE}
+sum(df$importe)
+```
+
+
+## 1.3) Gráfico de ventas por área
+```{r, echo=FALSE}
+df2 = select(df, idArea, importe)
+aux2 = df2 %>% 
+  group_by(idArea) %>% 
+  summarise(importe = sum(importe))
+
+etiquetas <- paste0(round(100 * aux2$importe/sum(aux2$importe), 2), "%")
+pie(aux2$importe, labels = etiquetas, radius = 1, col=rainbow(length(aux2$idArea)))
+legend("topleft", legend = c("1. Frescos", "2. Alimentación", "3. Textil ", "4. Bazar", "5. Electrodomesticos", "8. Promociones"), fill = rainbow(length(aux2$idArea)))
+```
+
+
+## 1.4) Gráfico de ventas del mes
+```{r, echo=FALSE}
+df$dia = as.Date(df$dia)
+df3 = select(df, dia, importe)
+aux3 = df3 %>% 
+  group_by(dia) %>% 
+  summarise(importe = sum(importe))
+plot(aux3$dia, aux3$importe, type = "l", xlab = "Fecha", ylab = "Monto")
+```
+
+
+## 1.5) Gráfico de ventas por día de la semana
+
+```{r, echo=FALSE}
+df4 = select(df, diaSemana, importe)
+df4$diaSemana = gsub("¡","",df4$diaSemana)
+df4$diaSemana = gsub("©","",df4$diaSemana)
+df4$diaSemana = gsub("Ã","a",df4$diaSemana)
+df4$diaSemana = gsub("miarcoles","miercoles",df4$diaSemana)
+
+aux4 = df4 %>% 
+  group_by(diaSemana) %>% 
+  summarise(importe = sum(importe))
+
+etiquetas <- paste0(round(100 * aux4$importe/sum(aux4$importe), 2), "%")
+pie(aux4$importe, labels = etiquetas, radius = 1, col=rainbow(length(aux4$diaSemana)))
+legend("topright", legend = c("Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"), fill = rainbow(length(aux4$diaSemana)))
+```
+
+
+## 1.6) Gráfico de ventas por hora del día
+```{r,echo=FALSE}
+df5 = select(df, horaCompra, importe)
+df5$horaCompra = gsub("±","",df5$horaCompra)
+df5$horaCompra = gsub("Ã","a",df5$horaCompra)
+#df5$horaCompra = gsub(".","",df5$horaCompra)
+df5$horaCompra = gsub("Medioda­a","Mediodia",df5$horaCompra)
+df5$horaCompra = gsub("Maaana","Mañana",df5$horaCompra)
+
+
+aux5 = df5 %>% 
+  group_by(horaCompra) %>% 
+  summarise(importe = sum(importe))
+
+etiquetas <- paste0(round(100 * aux5$importe/sum(aux5$importe), 2), "%")
+pie(aux5$importe, labels = etiquetas, radius = 1, col=rainbow(length(aux5$horaCompra)))
+legend("topright", legend = c("Mañana", "Mediodia", "Tarde"), fill = rainbow(length(aux5$horaCompra)))
+```
+
